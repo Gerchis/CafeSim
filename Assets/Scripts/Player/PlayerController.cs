@@ -16,13 +16,28 @@ public class PlayerController : MonoBehaviour
 
     private IInteractable objectToInteract;
 
+    private Animator anim;
+    private enum DIR
+    {
+        UP,
+        DOWN,
+        RIGHT,
+        LEFT,
+        NONE
+    }
+
+    private DIR dir = DIR.NONE;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
     }
 
     private void Update()
     {
+        AnimationManagement();
+
         if (InputManager.Instance.interact && objectToInteract != null)
         {
             objectToInteract.Interact();
@@ -54,6 +69,49 @@ public class PlayerController : MonoBehaviour
         if (objectToInteract == interactable)
         {
             objectToInteract = null;
+        }
+    }
+
+    void AnimationManagement()
+    {
+        if (InputManager.Instance.dirInput != Vector2.zero)
+        {
+            anim.SetBool("Walk", true);
+
+            anim.SetBool("DirUp", false);
+            anim.SetBool("DirDown", false);
+            anim.SetBool("DirRight", false);
+            anim.SetBool("DirLeft", false);
+
+            if (Mathf.Abs(rb.velocity.y) > Mathf.Abs(rb.velocity.x) && rb.velocity.y > 0)
+            {
+                anim.SetBool("DirUp",true);
+                dir = DIR.UP;
+            }
+            else if (Mathf.Abs(rb.velocity.y) > Mathf.Abs(rb.velocity.x) && rb.velocity.y < 0)
+            {
+                anim.SetBool("DirDown",true);
+                dir = DIR.DOWN;
+            }
+            else if (Mathf.Abs(rb.velocity.x) > Mathf.Abs(rb.velocity.y) && rb.velocity.x > 0)
+            {
+                anim.SetBool("DirRight", true);
+                dir = DIR.RIGHT;
+            }
+            else if (Mathf.Abs(rb.velocity.x) > Mathf.Abs(rb.velocity.y) && rb.velocity.x < 0)
+            {
+                anim.SetBool("DirLeft", true);
+                dir = DIR.LEFT;
+            }
+        }
+        else
+        {
+            anim.SetBool("Walk", false);
+
+            if (dir != DIR.NONE)
+            {
+                dir = DIR.NONE;
+            }
         }
     }
 }
